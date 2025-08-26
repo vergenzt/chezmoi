@@ -1,0 +1,4 @@
+# test that chezmoi add --new creates a new file
+exec chezmoi add --new $HOME/.file
+exec find $CHEZMOISOURCEDIR
+exists $CHEZMOISOURCEDIR/empty_dot_file

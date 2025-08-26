@@ -256,7 +256,26 @@ func TestAddCmd(t *testing.T) {
 				),
 			},
 		},
+		{
+			name: "new",
+			root: map[string]any{
+				"/home/user": map[string]any{
+					".local/share/chezmoi": &vfst.Dir{Perm: 0x777 &^ chezmoitest.Umask},
+				},
+			},
+			args: []string{"--new", "~/home/user/.file"},
+			tests: []any{
+				vfst.TestPath("/home/user/.local/share/chezmoi/empty_dot_file",
+					vfst.TestModeIsRegular(),
+					vfst.TestModePerm(0o666&^chezmoitest.Umask),
+					vfst.TestContents(nil),
+				),
+			},
+		},
 	} {
+		if tc.name != "new" {
+			continue
+		}
 		t.Run(tc.name, func(t *testing.T) {
 			chezmoitest.SkipUnlessGOOS(t, tc.name)
 			chezmoitest.WithTestFS(t, tc.root, func(fileSystem vfs.FS) {

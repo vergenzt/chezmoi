@@ -31,6 +31,7 @@ type addCmdConfig struct {
 	exact            bool
 	filter           *chezmoi.EntryTypeFilter
 	follow           bool
+	new              bool
 	prompt           bool
 	quiet            bool
 	recursive        bool
@@ -62,6 +63,7 @@ func (c *Config) newAddCmd() *cobra.Command {
 	addCmd.Flags().VarP(c.Add.filter.Exclude, "exclude", "x", "Exclude entry types")
 	addCmd.Flags().BoolVarP(&c.Add.follow, "follow", "f", c.Add.follow, "Add symlink targets instead of symlinks")
 	addCmd.Flags().VarP(c.Add.filter.Include, "include", "i", "Include entry types")
+	addCmd.Flags().BoolVar(&c.Add.new, "new", c.Add.new, "Create new file if target does not exist")
 	addCmd.Flags().BoolVarP(&c.Add.prompt, "prompt", "p", c.Add.prompt, "Prompt before adding each entry")
 	addCmd.Flags().BoolVarP(&c.Add.quiet, "quiet", "q", c.Add.quiet, "Suppress warnings")
 	addCmd.Flags().BoolVarP(&c.Add.recursive, "recursive", "r", c.Add.recursive, "Recurse into subdirectories")
@@ -186,9 +188,10 @@ func (c *Config) runAddCmd(cmd *cobra.Command, args []string, sourceState *chezm
 	}
 
 	destAbsPathInfos, err := c.destAbsPathInfos(sourceState, args, destAbsPathInfosOptions{
-		follow:       c.Mode == chezmoi.ModeSymlink || c.Add.follow,
-		onIgnoreFunc: c.defaultOnIgnoreFunc,
-		recursive:    c.Add.recursive,
+		follow:         c.Mode == chezmoi.ModeSymlink || c.Add.follow,
+		ignoreNotExist: c.Add.new,
+		onIgnoreFunc:   c.defaultOnIgnoreFunc,
+		recursive:      c.Add.recursive,
 	})
 	if err != nil {
 		return err

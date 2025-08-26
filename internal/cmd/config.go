@@ -1226,7 +1226,7 @@ func (c *Config) destAbsPathInfos(
 			walkFunc := func(destAbsPath chezmoi.AbsPath, fileInfo fs.FileInfo, err error) error {
 				switch {
 				case options.ignoreNotExist && errors.Is(err, fs.ErrNotExist):
-					return nil
+					return sourceState.AddDestAbsPathInfos(destAbsPathInfos, c.destSystem, destAbsPath, nil)
 				case err != nil:
 					return err
 				}
@@ -1264,6 +1264,9 @@ func (c *Config) destAbsPathInfos(
 			}
 			switch {
 			case options.ignoreNotExist && errors.Is(err, fs.ErrNotExist):
+				if err := sourceState.AddDestAbsPathInfos(destAbsPathInfos, c.destSystem, destAbsPath, nil); err != nil {
+					return nil, err
+				}
 				continue
 			case err != nil:
 				return nil, err

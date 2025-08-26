@@ -368,8 +368,14 @@ func (s *SourceState) Add(
 	destAbsPaths := slices.Sorted(maps.Keys(destAbsPathInfos))
 	n := 0
 	for _, destAbsPath := range destAbsPaths {
-		destAbsPathInfo := destAbsPathInfos[destAbsPath]
-		if !options.Filter.IncludeFileInfo(destAbsPathInfo) {
+		switch destAbsPathInfo := destAbsPathInfos[destAbsPath]; {
+		case destAbsPathInfo == nil:
+			// If the destination does not exist then create a new, empty file,
+			// unless files are excluded.
+			if !options.Filter.IncludeEntryTypeBits(EntryTypeFiles) {
+				continue
+			}
+		case !options.Filter.IncludeFileInfo(destAbsPathInfo):
 			continue
 		}
 
